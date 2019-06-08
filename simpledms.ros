@@ -1,0 +1,22 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  ;;#+quicklisp(ql:quickload ("external-program"))
+  )
+
+(defpackage :ros.script.simpledms.3766043645
+  (:use :cl))
+(in-package :ros.script.simpledms.3766043645)
+
+(load "./command-ui.lisp")
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (ui-top))
+
+;;; vim: set ft=lisp lisp:
