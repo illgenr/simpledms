@@ -1,4 +1,5 @@
 /simpledms
 /.env
+/*.dat
 /*.*~
 /*.fasl
