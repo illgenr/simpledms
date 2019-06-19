@@ -1,6 +1,6 @@
 # simpledms
-## Dead simple dead man's switch
-Send an email at after you stop responding to periodic pings
+## A dead simple dead man's switch
+Send someone an email after you stop responding to periodic pings
 
 ## Features
 - Send an email with a link that confirms you're alive

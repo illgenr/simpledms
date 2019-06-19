@@ -146,9 +146,14 @@
     (return-from adjust-key s)))
 
 (defun load-env ()
-  (let ((env (uiop/stream:read-file-lines ".env")))
-    (map nil #'(lambda (f v) (set f v)) ENV-format (map 'LIST #'TRIM-ENV-KEY env-keys env)))
-  (setq key (adjust-key key)))
+  (handler-case
+      (let ((env (uiop/stream:read-file-lines ".env")))
+	(map nil #'(lambda (f v) (set f v)) ENV-format (map 'LIST #'TRIM-ENV-KEY env-keys env)))
+    (error ()
+      (progn
+	(format t ".env file not detected~%")
+	(return-from load-env nil))))
+    (setq key (adjust-key key)))
 
 (defun get-cipher (key)
   (ironclad:make-cipher :twofish
@@ -185,17 +190,21 @@
 	(format t "Message ~D previously loaded~%" (id msg)))))
 
 (defun load-message-list()
-  (with-open-file (message-list-file "messages.dat" :if-exists :append :direction :input :if-does-not-exist :error)
-    (do ((line (read-line message-list-file nil)
-	       (read-line message-list-file nil)))
-	((null line))
-      ;(print line) 
-      (if (and (not (string= "" line)) (not (eq line nil))) (read-in-message (decrypt (parse-integer line) key)))))
-  (if (not (equal message-list nil))
-      (loop for msg in message-list
-	 do (if (> (id msg) id-counter)
-		(setq id-counter (id msg)))))
-  (format t "Message list loaded~%~%"))
+  (handler-case 
+      (with-open-file (message-list-file "messages.dat" :if-exists :append :direction :input :if-does-not-exist :error)
+	(do ((line (read-line message-list-file nil)
+		   (read-line message-list-file nil)))
+	    ((null line))
+					;(print line) 
+	  (if (and (not (string= "" line)) (not (eq line nil))) (read-in-message (decrypt (parse-integer line) key)))))
+    (error ()
+      (format t "No messages loaded~%")
+      (return-from load-message-list nil)))
+    (if (not (equal message-list nil))
+	(loop for msg in message-list
+	   do (if (> (id msg) id-counter)
+		  (setq id-counter (id msg)))))
+    (format t "Message list loaded~%~%"))
 
 (defun start-loaded-message-timers ()
   (loop for msg in message-list
